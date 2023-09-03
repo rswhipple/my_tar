@@ -105,6 +105,11 @@ struct s_tar_node {
 #define TOWRITE  00002          /* write by other */
 #define TOEXEC   00001          /* execute/search by other */
 
+/* functions in my_tar.c */
+int main(int argc, char *argv[]);
+int write_new_or_add_to_archive(arg_t *arg, flag_t *flag, tar_node_t* head, int fd);
+int initiate_archive_fd(arg_t *arg, flag_t *flag, int fd);
+
 /* functions in build_archive.c */
 int create_archive(char *name);
 void add_file(int fd, char *file_name, int type);
