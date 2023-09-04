@@ -29,7 +29,6 @@ All function prototypes are included in header.h and organized under the corresp
 TO install the project run "make my_tar" in your command line.
 
 ## Usage
-Usage
 List:     my_tar -tf 
 Extract:  my_tar -xf 
 Create:   my_tar -cf <archive-filename> [filenames...]
