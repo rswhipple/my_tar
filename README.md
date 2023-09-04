@@ -17,9 +17,11 @@ Unless specifically stated otherwise, options are applicable in all operating mo
 my_tar will not handle file inside subdirectory.
 
 ## Description
-In this program I define 4 structs: my_tar_header, s_tar_node, flag_s and arg_s. The my_tar_header struct is modeled after the POSIX header struct, see https://www.gnu.org/software/tar/manual/html_node/Standard.html#Standard. 
-The flag_s and arg_s structs store parsed options and arguments, respectively. The s_tar_node struct is a node which is only used with the -u flag. 
-The link list created with this node stores file name and mtime information for all archived files in the tarball, in order to compare with new entries.
+In this program I define 4 structs: my_tar_header, s_tar_node, flag_s and arg_s. 
+The my_tar_header struct is modeled after the POSIX header struct, see https://www.gnu.org/software/tar/manual/html_node/Standard.html#Standard. 
+The flag_s and arg_s structs store parsed options and arguments, respectively. 
+The s_tar_node struct is a node which is only used with the -u flag. 
+The link list created with s_tar_node stores file name and mtime entried for each archived file in the tarball, in order to compare with new entries.
 
 All function prototypes are included in header.h and organized under the corresponding .c file for easier navigation.
 
