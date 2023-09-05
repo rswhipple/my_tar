@@ -153,7 +153,7 @@ void add_tar_node_to_head(tar_node_t** head, tar_node_t* new_node);
 ssize_t check_file_mtime(char* file_to_update);
 int compare_file_names(tar_node_t* head, char* file_name);
 
-/* functions in tar_header.c 
+/* functions in tar_header.c */
 void create_header(header_t *header, char *file_name, int type);
 void write_space_before(unsigned int num, char* result, int len);
 void write_regular_number(unsigned int num, char* dst, int len);
