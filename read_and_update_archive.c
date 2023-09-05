@@ -58,37 +58,42 @@ int open_append_archive(char *name)
     return fd;
 }
 
-tar_node_t* create_tar_node_list(char *name) 
+void create_tar_node_list(tar_node_t** head, char *name)
 {
+    tar_node_t* new_node;
+
     int fd = open(name, O_RDWR, 0644);
     if (!fd) {
         exit(EXIT_FAILURE);
     }
 
-    tar_node_t* head = NULL;
     ssize_t bytes = 1;
+    ssize_t* byte_ptr = &bytes;
 
     while (bytes > 0) {
-        tar_node_t* new_node = malloc(sizeof(tar_node_t) + 1);
-        bytes = create_tar_node(new_node, fd);
-        add_tar_node_to_head(&head, new_node);
+        new_node = create_tar_node(byte_ptr, fd);
+        if (bytes == 0) {
+            break;
+        }
+        if (new_node != NULL) {
+            add_tar_node_to_head(head, new_node);
+        }
     }
 
-    return head;
+    close(fd);
 }
 
-int create_tar_node(tar_node_t* new_node, int fd)
+tar_node_t* create_tar_node(ssize_t* bytes, int fd)
 {
-    ssize_t bytes = 1;
-
-    // Create header_t and read data from fd
+    // Create header_t and read data to header from fd
     header_t* header = malloc(sizeof(header_t));
-    bytes = read(fd, header, sizeof(header_t));
+    *bytes = read(fd, header, sizeof(header_t));
 
     // End of archive
     if (header->name[0] == '\0') {
         free(header);
-        return 0;
+        *bytes = 0;
+        return NULL;
     }
 
     // Convert the size field to an integer
@@ -98,13 +103,14 @@ int create_tar_node(tar_node_t* new_node, int fd)
     size_t remaining_blocks = (file_size + BLOCK_SIZE - 1) / BLOCK_SIZE;
     lseek(fd, remaining_blocks * BLOCK_SIZE + 12, SEEK_CUR);
 
-    // Allocate memory for name field
+    // Allocate memory for new node
+    tar_node_t* new_node = malloc(sizeof(tar_node_t));
     int len = strlen(header->name);
     new_node->name = malloc(sizeof(char) * len + 1);
     my_strcpy(new_node->name, header->name);
 
     // Convert mtime field to integer
-    size_t file_mtime = my_strtol(header->mtime, NULL, 8);
+    ssize_t file_mtime = my_strtol(header->mtime, NULL, 8);
     new_node->mtime = file_mtime;
 
     // Save tail of linklist
@@ -112,7 +118,7 @@ int create_tar_node(tar_node_t* new_node, int fd)
 
     free(header);
 
-    return bytes;
+    return new_node;
 }
 
 void add_tar_node_to_head(tar_node_t** head, tar_node_t* new_node) // double check that if is needed
@@ -128,7 +134,7 @@ void add_tar_node_to_head(tar_node_t** head, tar_node_t* new_node) // double che
 int compare_file_names(tar_node_t* head, char* file_name) 
 {
     tar_node_t* current = head;
-    unsigned int new_file_mtime;
+    ssize_t new_file_mtime;
 
     // Iterate thru linklist
     while (current != NULL) {
@@ -136,7 +142,7 @@ int compare_file_names(tar_node_t* head, char* file_name)
         if (current->name == file_name) {
             new_file_mtime = check_file_mtime(file_name);
             // If the new file was modified more recently, return TRUE
-            if (new_file_mtime > current->mtime) {
+            if (new_file_mtime < current->mtime) {
                 return 1;
             }
         }
@@ -148,7 +154,7 @@ int compare_file_names(tar_node_t* head, char* file_name)
 }
 
 
-unsigned int check_file_mtime(char* file_to_update) 
+ssize_t check_file_mtime(char* file_to_update) 
 {
     struct stat sb;
 
@@ -157,8 +163,7 @@ unsigned int check_file_mtime(char* file_to_update)
         return -1;
     }
 
-    unsigned int mtime = sb.st_mtimespec.tv_sec;
-    // size_t file_mtime = my_strtol(header->mtime, NULL, 8);
+    ssize_t mtime = sb.st_mtimespec.tv_sec;
 
     return mtime;
 }

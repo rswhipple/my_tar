@@ -147,13 +147,13 @@ int check_file_type(char* arg);
 /* functions in read_and_update_archive.c */
 int read_file_names(char *tar_filename);
 int open_append_archive(char *name);
-tar_node_t* create_tar_node_list(char *name);
-int create_tar_node(tar_node_t* new_node, int fd);
+void create_tar_node_list(tar_node_t** head, char *name);
+tar_node_t* create_tar_node(ssize_t* bytes, int fd);
 void add_tar_node_to_head(tar_node_t** head, tar_node_t* new_node);
-unsigned int check_file_mtime(char* file_to_update);
+ssize_t check_file_mtime(char* file_to_update);
 int compare_file_names(tar_node_t* head, char* file_name);
 
-/* functions in tar_header.c */
+/* functions in tar_header.c 
 void create_header(header_t *header, char *file_name, int type);
 void write_space_before(unsigned int num, char* result, int len);
 void write_regular_number(unsigned int num, char* dst, int len);
