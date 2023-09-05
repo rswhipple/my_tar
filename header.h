@@ -107,8 +107,8 @@ struct s_tar_node {
 
 /* functions in my_tar.c */
 int main(int argc, char *argv[]);
-int write_new_or_add_to_archive(arg_t *arg, flag_t *flag, tar_node_t* head, int fd);
-int initiate_archive_fd(arg_t *arg, flag_t *flag, int fd);
+int write_new_or_add_to_archive(arg_t *arg, flag_t *flag, tar_node_t* head, int* fd);
+int initiate_archive_fd(arg_t *arg, flag_t *flag, int* fd);
 
 /* functions in build_archive.c */
 int create_archive(char *name);

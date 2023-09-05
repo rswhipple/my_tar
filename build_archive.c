@@ -2,11 +2,13 @@
 
 int create_archive(char *name) 
 {
+    // Create archive
     int fd = open(name, O_CREAT | O_RDWR, 0644);
     if (fd == -1) {
         exit(EXIT_FAILURE);
     }
     
+    // Return file descriptor
     return fd;
 }
 
@@ -16,7 +18,8 @@ void add_file(int fd, char *file_name, int type)
     write_header(fd, file_name, type);
 
     // File content
-    if (type != 5 && type != 1 && type != 2) { // If file is a directory or symlink, don't write file content
+    // If file is a directory or symlink, program will not write file content
+    if (type != 5 && type != 1 && type != 2) { 
         write_file(fd, file_name);
     } 
 }
@@ -125,12 +128,11 @@ void write_end_of_file_entry(int fd)
     char zero_block[BLOCK_SIZE] = {0};
     write(fd, zero_block, BLOCK_SIZE);
     write(fd, zero_block, BLOCK_SIZE);
-
-    // printf("end of entry, bytes_written = %zi\n", bytes_written);
 }
 
 int check_file_size(char* arg) 
 {
+    // Create struct to store file info
     struct stat sb;
 
     if (lstat(arg, &sb) == -1) {

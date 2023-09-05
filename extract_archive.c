@@ -2,7 +2,7 @@
 
 int extract_archive(char *tar_filename, char *path)
 {
-    // Open fd to tar file
+    // Open fd of tar file
     int fd = open(tar_filename, O_RDONLY, 0644);
     if (!fd) {
         printf("Error opening tar file\n");
@@ -17,7 +17,7 @@ int extract_archive(char *tar_filename, char *path)
         header_t* header = malloc(sizeof(header_t));
         bytes = read(fd, header, sizeof(header_t));
 
-        // End of archive
+        // If end of archive is reached, free header and break
         if (header->name[0] == '\0') {
             free(header);
             break;
