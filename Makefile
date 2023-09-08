@@ -2,7 +2,7 @@ TARGET = my_tar
 SRCS = my_tar.c getopt.c parser.c build_archive.c deallocate_memory.c tar_header.c read_and_update_archive.c extract_archive.c
 OBJS = $(SRCS:.c=.o)
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address --pedantic-errors
+CFLAGS = -Wall -Wextra -Werror 
 
 all: $(TARGET)
 

@@ -88,7 +88,7 @@ int write_new_or_add_to_archive(arg_t *arg, flag_t *flag, tar_node_t* head, int*
         while (i < arg->size) {
             if (flag->OPT_u == 1) // Skip file if an earlier version already exists in archive (-u)
             {
-                if (!compare_file_names(head, arg->files[i])) // Check file type and add file (-u)
+                if (compare_file_names(head, arg->files[i])) // Check file type and add file (-u)
                 {
                     type = check_file_type(arg->files[i]);
                     if (type == -1) {

@@ -139,18 +139,29 @@ int compare_file_names(tar_node_t* head, char* file_name)
     // Iterate thru linklist
     while (current != NULL) {
         // If file_name == name in linklist, check mtime
-        if (current->name == file_name) {
+        int not_equal = strcmp(current->name, file_name);
+        // TESTING
+        // if (not_equal == 0) {
+        //     printf("%s + %s are equal\n", current->name, file_name);
+        // } else if (not_equal != 0) {
+        //     printf("%s + %s are not equal\n", current->name, file_name);
+        // }
+
+        if (not_equal == 0) {
             new_file_mtime = check_file_mtime(file_name);
             // If the new file was modified more recently, return TRUE
-            if (new_file_mtime < current->mtime) {
+            if (new_file_mtime > current->mtime) {
                 return 1;
+            } else {
+                // If the new file was modified less recently or is the same, return FALSE
+                return 0;
             }
         }
         current = current->next;
     }
 
-    // Return FALSE
-    return 0;
+    // Return TRUE if file_name was not found in linklist
+    return 1;
 }
 
 
