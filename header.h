@@ -134,6 +134,10 @@ void set_permissions(char* file_name, char* header);
 char* remove_prefix(char* name);
 char* my_strcat(char *dest, char *src);
 long my_strtol(char *str, char **endptr, int base);
+int my_is_space(int c);
+int my_is_digit(int c);
+int my_is_alpha(int c);
+int my_to_downcase(int c);
 
 /* functions in getopt.c */
 int my_getopt(int argc, char *argv[], flag_t *flags);
