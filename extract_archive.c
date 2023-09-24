@@ -1,14 +1,17 @@
 #include "header.h"
 
-int extract_archive(char *tar_filename, char *path)
+
+int extract_archive(char *tar_filename)
 {
     // Open fd of tar file
     int fd = open(tar_filename, O_RDONLY, 0644);
-    if (!fd) {
-        printf("Error opening tar file\n");
-        return 1;
+    if (fd == -1) {
+        char* error = "Error opening tar file\n";
+        write(2, error, 30);
+        return EXIT_FAILURE;
     }
 
+    char* path = "./";
     ssize_t bytes = 1;
 
     while (bytes > 0) 
@@ -26,16 +29,19 @@ int extract_archive(char *tar_filename, char *path)
         // Convert size field to size_t
         size_t file_size = my_strtol(header->size, NULL, 8);
 
-        /* deal with linkname + prefix ? */
-
         // Jump to end of block
         lseek(fd, 12, SEEK_CUR);
+
+        // Check if directory exists
+        is_directory(header->name, path);
 
         // Create path for new file
         char* file_name = create_file_path(header->name, path);
 
         // Write file
-        create_file(file_name, fd, file_size);
+        if(create_file(file_name, fd, file_size) != 0) {
+            return EXIT_FAILURE;
+        }
         set_permissions(file_name, header->mode);
 
         // Calculate remaining bytes in current block + jump to end
@@ -50,8 +56,82 @@ int extract_archive(char *tar_filename, char *path)
     // Close fd to tar file
     close(fd);
 
+    return EXIT_SUCCESS;
+}
+
+
+int is_directory(char* name, char* path) 
+{
+    // if there is a directory, remove file_name
+    char* directory_name = isolate_directory(name);
+
+    // check to see if directory exists
+    if (directory_name != NULL) {
+        char* directory_path = create_file_path(directory_name, path);
+        free(directory_name);
+
+        // if no !directory, make directory
+        if (check_file_type(directory_path) != 5) {
+            int status = mkdir(directory_path, 0777);
+            if (status != 0) {
+                char* error = "Error creating directory\n";
+                write(2, error, 30);
+                return EXIT_FAILURE;
+            }
+        } 
+        free(directory_path);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+
+char* isolate_directory(char* name) 
+{
+    // Find last '/' in string
+    int index = lst_slash(name); 
+
+    // Create path for directory
+    if (index > 0) {
+        char* directory = malloc(sizeof(char) * index + 1);
+        my_cpy_prefix(directory, name, index);
+        return directory;
+    }
+    else {
+        return NULL;
+    }
+}
+
+
+int lst_slash(char* str_1)
+{
+    char char_1 = '/';
+    int len = my_strlen(str_1) - 1;
+    int i;
+
+    for (i = len; i > 0; i--) {
+        if (str_1[i] == char_1) {
+            return i;
+        }
+    }
+
     return 0;
 }
+
+
+char* my_cpy_prefix(char* dst, char* src, int index)
+{
+    int i;
+
+    for (i = 0; i < index; i++) {
+        dst[i] = src[i];
+    }
+
+    dst[i] = '\0';
+
+    return dst;
+}
+
 
 void set_permissions(char* file_name, char* header) 
 {
@@ -59,31 +139,32 @@ void set_permissions(char* file_name, char* header)
     chmod(file_name, mode);
 }
 
-long my_strtol(char *str, char **endptr, int base) // FIX illegal functions
+
+long my_strtol(char *str, char **endptr, int base) 
 {
     // Skip leading whitespace 
-    while (isspace(*str)) {
-        str++;
+    while (my_is_space(*str)) {
+        str += 1;
     }
 
     // Conversion
     long result = 0;
     while (*str != '\0') {
         int digit;
-        if (isdigit(*str)) {
+        if (my_is_digit(*str)) {
             digit = *str - '0';
-        } else if (isalpha(*str)) {
-            digit = tolower(*str) - 'a' + 10;
+        } else if (my_is_alpha(*str)) {
+            digit = my_to_downcase(*str) - 'a' + 10;
         } else {
             break;  // Invalid character, stop conversion
         }
 
         if (digit >= base) {
-            break;  // Invalid digit for the given base, stop conversion
+            break;  // Invalid digit for base, stop conversion
         }
 
         result = result * base + digit;
-        str++;
+        str += 1;
     }
 
     // Update endptr if provided
@@ -93,6 +174,7 @@ long my_strtol(char *str, char **endptr, int base) // FIX illegal functions
 
     return result;
 }
+
 
 char* my_strcat(char *dst, char *src) { 
     // Save original destination pointer
@@ -116,15 +198,19 @@ char* my_strcat(char *dst, char *src) {
     return original_dst;
 }
 
-void create_file(char* name, int tar_fd, size_t file_size) 
+
+int create_file(char* name, int tar_fd, size_t file_size) 
 {
+
     // Create new file
-    int file_fd = open(name, O_CREAT | O_WRONLY, 0644);
+    int file_fd = open(name, O_CREAT | O_RDWR, 0755);
 
     // Create buf and read tar fd to buf
     char *buf = malloc(sizeof(char) * file_size + 1);
-    if (!file_fd) {
-        printf("Error creating file\n");
+    if (file_fd == -1) {
+        char* error = "Error creating file\n";
+        write(2, error, 30);
+        return EXIT_FAILURE;
     }
     read(tar_fd, buf, file_size);
 
@@ -138,36 +224,62 @@ void create_file(char* name, int tar_fd, size_t file_size)
     free(buf);
     close(file_fd);
 
+    return EXIT_SUCCESS;
 }
+
 
 char* create_file_path(char* header, char* path)
 {
-    // Remove original prefix
-    char* name = remove_prefix(header);
-
     // Find length of file name and provided path
-    int len = strlen(name);
-    int len_path = strlen(path);
+    int len = my_strlen(header);
+    int len_path = my_strlen(path);
 
     // Create new variable, copy and cat 
     char* file_name = malloc(sizeof(char) * (len + len_path + 1));
     my_strcpy(file_name, path);
-    my_strcat(file_name, name);
+    my_strcat(file_name, header);
 
     return file_name;
 }
 
-char* remove_prefix(char* name) 
-{
-    // Find last '/' in string
-    char* last_slash = strrchr(name, '/'); // replace strrchr
 
-    // Return pointer to position following last slash
-    if (last_slash) {
-        return last_slash + 1;
+int my_is_space(int c)
+{
+    if (c == ' ' || c == '\t' || c == '\n') {
+        return 1; 
+    } else {
+        return 0;
     }
-    else {
-        return name;
+}
+
+
+int my_is_digit(int c)
+{
+    if (c >= '0' && c <= '9') {
+        return 1; 
+    } else {
+        return 0;
     }
+}
+
+
+int my_is_alpha(int c)
+{
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+        return 1; 
+    } else {
+        return 0;
+    }
+}
+
+
+int my_to_downcase(int c)
+{
+    int output = c;
+    if (c >= 'A' && c <= 'Z') {
+        output += 32;
+    } 
+
+    return output;
 }
 

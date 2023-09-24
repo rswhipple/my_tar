@@ -8,6 +8,7 @@ void custom_exit(flag_t *flag, arg_t *arg)
     free(arg);
 }
 
+
 void free_array(char **array, int size) 
 {
     int i = 0;
@@ -19,6 +20,7 @@ void free_array(char **array, int size)
 
     free(array);
 }
+
 
 void free_tar_linklist(tar_node_t* head)
 {

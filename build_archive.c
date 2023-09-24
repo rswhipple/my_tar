@@ -1,28 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "header.h"
 
 int create_archive(char *name) 
 {
-    // Create archive
-    int fd = open(name, O_CREAT | O_RDWR, 0644);
-    if (fd == -1) {
-        exit(EXIT_FAILURE);
-    }
-    
-    // Return file descriptor
+    int fd = open(name, O_CREAT | O_RDWR, 0755);
     return fd;
 }
+
 
 void add_file(int fd, char *file_name, int type) 
 {
     // Header
     write_header(fd, file_name, type);
 
-    // File content
-    // If file is a directory or symlink, program will not write file content
+    // File content - if file is a directory or symlink, don't write file content
     if (type != 5 && type != 1 && type != 2) { 
         write_file(fd, file_name);
     } 
 }
+
 
 void add_directory(int fd, char *file_name)
 {
@@ -57,7 +55,8 @@ void add_directory(int fd, char *file_name)
     free(dir_name);
 }
 
-void write_header(int fd, char *file_name, int type) 
+
+int write_header(int fd, char *file_name, int type) 
 {
     // Header
     header_t* header = malloc(sizeof(header_t) * 1);
@@ -66,7 +65,7 @@ void write_header(int fd, char *file_name, int type)
 
     // ERROR + EXIT
     if (bytes_written != 500) {  
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     // 12 byte offset
@@ -75,20 +74,23 @@ void write_header(int fd, char *file_name, int type)
 
     // ERROR + EXIT
     if (bytes_written != 12) {  
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     free(header);
+
+    return EXIT_SUCCESS;
 }
 
 
-void write_file(int fd, char *file_name) 
+int write_file(int fd, char *file_name) 
 {
     // Open file
     int file_fd = open(file_name, O_RDONLY);
     if (file_fd == -1) {
-        printf("Error opening file\n");
-        return;
+        char* error = "Error opening file\n";
+        write(2, error, 25);
+        return EXIT_FAILURE;
     }
 
     // Initiate remaining_bytes equal to the file's total size
@@ -113,13 +115,16 @@ void write_file(int fd, char *file_name)
 
         bytes_written = write(fd, buffer, BLOCK_SIZE);
         if (bytes_written == -1) {
-            printf("Error writing to tar file\n");
+            char* error = "Error writing to tar file\n";
+            write(2, error, 30);
             close(file_fd);
-            return;
+            return EXIT_FAILURE;
         }
     }
 
     close(file_fd);
+
+    return EXIT_SUCCESS;
 }
 
 
@@ -130,13 +135,13 @@ void write_end_of_file_entry(int fd)
     write(fd, zero_block, BLOCK_SIZE);
 }
 
+
 int check_file_size(char* arg) 
 {
-    // Create struct to store file info
     struct stat sb;
 
     if (lstat(arg, &sb) == -1) {
-        printf("my_tar: cannot access '%s': No such file or directory\n", arg);
+        error_message(arg);
         return -1;
     }
 
@@ -145,9 +150,10 @@ int check_file_size(char* arg)
     return size;
 }
 
+
 char* format_directory_name(char *file_name) 
 {
-    int str_len = strlen(file_name);
+    int str_len = my_strlen(file_name);
     char * buf = NULL;
 
     // If char* does not end with '/', realloc and add '/'
@@ -160,13 +166,15 @@ char* format_directory_name(char *file_name)
         buf = malloc(sizeof(char) * str_len + 1);
         buf = my_strcpy(buf, file_name);
     }
+    
     return buf;
 }
+
 
 char* format_file_name_in_directory(char* name, char* path)
 {
     // Find length of file name and path
-    int len = strlen(name);
+    int len = my_strlen(name);
     int len_path = strlen(path);
 
     // Create new variable, copy and cat 
@@ -175,4 +183,15 @@ char* format_file_name_in_directory(char* name, char* path)
     my_strcat(file_name, name);
 
     return file_name;
+}
+
+int my_strlen(char* str) 
+{
+    int i = 0;
+
+    do {
+        i += 1;
+    } while (str[i] != '\0');
+
+    return i;
 }

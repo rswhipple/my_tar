@@ -86,8 +86,8 @@ struct s_tar_node {
 #define FIFOTYPE '6'            /* FIFO special */
 #define CONTTYPE '7'            /* reserved */
 
-#define XHDTYPE  'x'            /* Extended header referring to the
-                                   next file in the archive */
+#define XHDTYPE  'x'            /* Extended header referring to the next file in the archive */
+                                   
 #define XGLTYPE  'g'            /* Global extended header */
 
 /* Bits used in the mode field, values in octal.  */
@@ -114,12 +114,13 @@ int initiate_archive_fd(arg_t *arg, flag_t *flag, int* fd);
 int create_archive(char *name);
 void add_file(int fd, char *file_name, int type);
 void add_directory(int fd, char *file_name);
-void write_header(int fd, char *file_name, int type);
-void write_file(int fd, char *file_name);
+int write_header(int fd, char *file_name, int type);
+int write_file(int fd, char *file_name);
 int check_file_size(char* arg);
 void write_end_of_file_entry(int fd);
 char* format_directory_name(char *file_name);
 char* format_file_name_in_directory(char* name, char* path);
+int my_strlen(char* str);
 
 /* functions in deallocate_memory.c */
 void custom_exit(flag_t *flag, arg_t *arg);
@@ -127,11 +128,14 @@ void free_array(char **array, int size);
 void free_tar_linklist(tar_node_t* head);
 
 /* functions in extract_archive.c */
-int extract_archive(char* tar_filename, char* path);
+int extract_archive(char* tar_filename);
+int is_directory(char* name, char* path);
+char* isolate_directory(char* name);
+int lst_slash(char* str_1);
+char* my_cpy_prefix(char* dst, char* src, int index);
 char* create_file_path(char* name, char* path);
-void create_file(char* name, int fd, size_t blocks);
+int create_file(char* name, int fd, size_t blocks);
 void set_permissions(char* file_name, char* header);
-char* remove_prefix(char* name);
 char* my_strcat(char *dest, char *src);
 long my_strtol(char *str, char **endptr, int base);
 int my_is_space(int c);
@@ -145,8 +149,9 @@ int check_flags(int argc, char *const argv[], const char *optstring, flag_t *fla
 int getopt_errors(flag_t* flags);
 
 /* functions in parser.c */
-void parse_args(int argc, char *argv[], flag_t *flags, arg_t *arg);
+int parse_args(int argc, char *argv[], flag_t *flags, arg_t *arg);
 int check_file_type(char* arg);
+void error_message(char* name);
 
 /* functions in read_and_update_archive.c */
 int read_file_names(char *tar_filename);
@@ -156,6 +161,8 @@ tar_node_t* create_tar_node(ssize_t* bytes, int fd);
 void add_tar_node_to_head(tar_node_t** head, tar_node_t* new_node);
 ssize_t check_file_mtime(char* file_to_update);
 int compare_file_names(tar_node_t* head, char* file_name);
+int my_strcmp(char* str_1, char* str_2);
+void print_file_name(char* name);
 
 /* functions in tar_header.c */
 void create_header(header_t *header, char *file_name, int type);

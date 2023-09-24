@@ -1,12 +1,14 @@
 #include "header.h"
 
+
 void create_header(header_t *header, char *file_name, int type) 
 {
     struct stat sb;
 
     // Open lstat
     if (lstat(file_name, &sb) == -1) {
-        printf("my_tar: cannot access '%s': No such file or directory\n", file_name);
+        error_message(file_name);
+        exit(EXIT_FAILURE);
     }
     
     // If name lenght > 100 split between name and prefix
@@ -37,12 +39,12 @@ void create_header(header_t *header, char *file_name, int type)
 
     memset(header->version, '0', 2);                                /* version */ 
 
-    int devmajor = major(sb.st_dev);
-    // int devmajor = 0;   // work around
+    // int devmajor = major(sb.st_dev);
+    int devmajor = 0;   // work around
     write_space_before(devmajor, header->devmajor, 8);              /* devmajor */
 
-    int devminor = minor(sb.st_dev);
-    // int devminor = 0;   // work around
+    // int devminor = minor(sb.st_dev);
+    int devminor = 0;   // work around
     write_space_before(devminor, header->devminor, 8);              /* devminor */
 
     struct passwd *user_info = getpwuid(sb.st_uid);
@@ -55,6 +57,7 @@ void create_header(header_t *header, char *file_name, int type)
     unsigned int chksum = calculate_checksum(header);
     write_chksum(chksum, header->chksum, 8);
 }
+
 
 char set_typeflag(int type)
 {
@@ -72,6 +75,7 @@ char set_typeflag(int type)
     }
 }
 
+
 void write_space_before(unsigned int num, char* dst, int len) 
 {
     dst[len - 1] = '\0';
@@ -79,12 +83,14 @@ void write_space_before(unsigned int num, char* dst, int len)
     decimal_to_octal(num, dst, len - 2);
 }
 
+
 void write_regular_number(unsigned int num, char* dst, int len) 
 {
     dst[len] = '\0';
     dst[len - 1] = ' ';
     decimal_to_octal(num, dst, len - 1);
 }
+
 
 void write_chksum(unsigned int num, char* dst, int len) 
 {
@@ -114,7 +120,7 @@ void decimal_to_octal(unsigned int num, char* dst, int len)
 
 int zero_padded_char(char* dst, int dst_len, char* src) 
 {
-    int length = strlen(src);
+    int length = my_strlen(src);
     int i = 0;
 
     // Copy src to dst
@@ -136,7 +142,7 @@ int zero_padded_char(char* dst, int dst_len, char* src)
 void check_name_length(char* dst_1, char* dst_2, char* src) 
 {
     char *buf;
-    int src_len = strlen(src);
+    int src_len = my_strlen(src);
 
     /* If file name is longer than 100 */
     if (src_len > 100) 
@@ -177,7 +183,8 @@ void find_linkname(char* file_name, char *header) // do you really need to mallo
 
     // If readlink() produces error, exit program
     if (bytes == -1) {
-        perror("readlink");
+        char* error = "readlink\n";
+        write(2, error, 50);
         exit(EXIT_FAILURE);
     }
 
@@ -186,7 +193,8 @@ void find_linkname(char* file_name, char *header) // do you really need to mallo
 
     // If linkname takes up the full buf it may have been longer
     if (bytes == buf_size) {
-        printf("(Linkname may have been truncated)\n");
+        char* error = "(Linkname may have been truncated)\n";\
+        write(1, error, 50);
     }
 
     // Copy buf into header->linkname with padding
@@ -220,6 +228,7 @@ unsigned int calculate_checksum(header_t *header) // try function pointers?
     return sum;
 }
 
+
 unsigned int calculate_string_ascii_sum(char *header, int size)
 {
     unsigned int sum = 0;
@@ -232,10 +241,11 @@ unsigned int calculate_string_ascii_sum(char *header, int size)
     return sum;
 }
 
+
 char* my_strcpy(char* dst, char* src)
 {
     int i;
-    int len = strlen(src);
+    int len = my_strlen(src);
 
     for (i = 0; i < len; i++) {
         dst[i] = src[i]; 
@@ -246,10 +256,11 @@ char* my_strcpy(char* dst, char* src)
     return dst;
 }
 
+
 char* my_strncpy(char* dst, char* src, int index)
 {
     int i;
-    int length = strlen(src);
+    int length = my_strlen(src);
 
     for (i = 0; index < length; i++) {
         dst[i] = src[index];
@@ -261,9 +272,3 @@ char* my_strncpy(char* dst, char* src, int index)
     return dst;
 }
 
-    // TESTING
-    // printf("header->name = |%s|\n", header->name); printf("header->prefix = |%s|\n", header->prefix);
-    // printf("Mode: %jo (octal)\n", (uintmax_t) sb.st_mode);
-    // printf("header->mode = |%s|\n", header->mode);
-    // printf("int chksum = |%u|\n", chksum);
-    // printf("devmajor = |%i|\n", devmajor);

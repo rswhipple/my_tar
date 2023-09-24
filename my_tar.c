@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "header.h"
 
 int main(int argc, char *argv[]) 
@@ -16,17 +17,15 @@ int main(int argc, char *argv[])
 
     // Parse arguments
     arg_t *arg = (arg_t *)malloc(sizeof(arg_t) + 1);
-    parse_args(argc, argv, flag, arg);
+    if (parse_args(argc, argv, flag, arg) != 0) {
+        custom_exit(flag, arg);
+        return EXIT_FAILURE;
+    }
 
     // Extract archive contents
     if (flag->OPT_x == 1) {
-        // If destination for extraction was provided
-        if (arg->size > 0) {
-            extract_archive(arg->name, arg->files[0]);
-        } // If no destination, extract to current folder
-        else {
-            extract_archive(arg->name, "./");
-        }  
+        // Future update: if files are listed -> only extract those files
+        extract_archive(arg->name);
     } 
 
     // Initiate file descriptor and link list head
@@ -40,13 +39,17 @@ int main(int argc, char *argv[])
     // Create or open archive
     if (flag->OPT_c == 1 || flag->OPT_r == 1 || flag->OPT_u == 1) {
         int status = initiate_archive_fd(arg, flag, ptr_fd);
-        if (status == EXIT_FAILURE) return EXIT_FAILURE;
+        if (status != 0) {
+            return EXIT_FAILURE;
+        }
     }
 
     // Write or add to archive
     if (flag->OPT_r == 1 || flag->OPT_c == 1 || flag->OPT_u == 1) {
         int status = write_new_or_add_to_archive(arg, flag, head, ptr_fd);
-        if (status == EXIT_FAILURE) return EXIT_FAILURE;
+        if (status != 0) {
+            return EXIT_FAILURE;
+        }
     }
 
     // Read file names to stdout
@@ -63,19 +66,25 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+
 int initiate_archive_fd(arg_t *arg, flag_t *flag, int* fd) 
 {
     if (flag->OPT_c == 1) {
         *fd = create_archive(arg->name);
-        if (*fd == -1) return EXIT_FAILURE;
+        if (*fd == -1) {
+            return EXIT_FAILURE;
+        }
     }
     if (flag->OPT_r == 1 || flag->OPT_u == 1) {
         *fd = open_append_archive(arg->name);
-        if (*fd == -1) return EXIT_FAILURE;
+        if (*fd == -1) {
+            return EXIT_FAILURE;
+        }
     } 
    
     return EXIT_SUCCESS;
 }
+
 
 int write_new_or_add_to_archive(arg_t *arg, flag_t *flag, tar_node_t* head, int* fd) 
 {
