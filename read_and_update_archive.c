@@ -185,30 +185,6 @@ ssize_t check_file_mtime(char* file_to_update)
 }
 
 
-int my_strcmp(char* str_1, char* str_2) 
-{
-    int i;
-    int str_to_int_1 = 0;
-    int str_to_int_2 = 0;
-
-    for (i = 0; str_1[i] != '\0'; i++) {
-        str_to_int_1 += str_1[i];
-    } 
-
-    for (i = 0; str_2[i] != '\0'; i++) {
-        str_to_int_2 += str_2[i];
-    } 
-    
-    if (str_to_int_1 == str_to_int_2) {
-        return 0;
-    } else if (str_to_int_1 > str_to_int_2) {
-        return -1;
-    } else {
-        return 1;
-    }
-}
-
-
 void print_file_name(char* name) 
 {
     int len = my_strlen(name);

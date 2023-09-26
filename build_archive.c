@@ -184,14 +184,3 @@ char* format_file_name_in_directory(char* name, char* path)
 
     return file_name;
 }
-
-int my_strlen(char* str) 
-{
-    int i = 0;
-
-    do {
-        i += 1;
-    } while (str[i] != '\0');
-
-    return i;
-}

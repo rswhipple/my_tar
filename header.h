@@ -120,7 +120,6 @@ int check_file_size(char* arg);
 void write_end_of_file_entry(int fd);
 char* format_directory_name(char *file_name);
 char* format_file_name_in_directory(char* name, char* path);
-int my_strlen(char* str);
 
 /* functions in deallocate_memory.c */
 void custom_exit(flag_t *flag, arg_t *arg);
@@ -136,12 +135,6 @@ char* my_cpy_prefix(char* dst, char* src, int index);
 char* create_file_path(char* name, char* path);
 int create_file(char* name, int fd, size_t blocks);
 void set_permissions(char* file_name, char* header);
-char* my_strcat(char *dest, char *src);
-long my_strtol(char *str, char **endptr, int base);
-int my_is_space(int c);
-int my_is_digit(int c);
-int my_is_alpha(int c);
-int my_to_downcase(int c);
 
 /* functions in getopt.c */
 int my_getopt(int argc, char *argv[], flag_t *flags);
@@ -161,7 +154,6 @@ tar_node_t* create_tar_node(ssize_t* bytes, int fd);
 void add_tar_node_to_head(tar_node_t** head, tar_node_t* new_node);
 ssize_t check_file_mtime(char* file_to_update);
 int compare_file_names(tar_node_t* head, char* file_name);
-int my_strcmp(char* str_1, char* str_2);
 void print_file_name(char* name);
 
 /* functions in tar_header.c */
@@ -174,10 +166,20 @@ int zero_padded_char(char* dst, int dst_len, char* src);
 void check_name_length(char* dst_1, char* dst_2, char* src);
 void find_linkname(char* file_name, char *header);
 unsigned int calculate_checksum(header_t *header);
+char set_typeflag(int type);
+
+/* functions in helper.c */
 unsigned int calculate_string_ascii_sum(char *header, int size);
 char* my_strncpy(char* dst, char* src, int index);
 char* my_strcpy(char* dst, char* src);
-char set_typeflag(int type);
+int my_strcmp(char* str_1, char* str_2);
+int my_strlen(char* str);
+char* my_strcat(char *dest, char *src);
+long my_strtol(char *str, char **endptr, int base);
+int my_is_space(int c);
+int my_is_digit(int c);
+int my_is_alpha(int c);
+int my_to_downcase(int c);
 
 
 /*
