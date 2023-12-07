@@ -1,4 +1,5 @@
-#include "header.h"
+#include "../include/extract_archive.h"
+#include "../include/helper.h"
 
 
 int extract_archive(char *tar_filename)
@@ -142,7 +143,6 @@ void set_permissions(char* file_name, char* header)
 
 int create_file(char* name, int tar_fd, size_t file_size) 
 {
-
     // Create new file
     int file_fd = open(name, O_CREAT | O_RDWR, 0755);
 

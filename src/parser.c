@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "header.h"
+#include "../include/parser.h"
+#include "../include/helper.h"
 
 
 int parse_args(int argc, char *argv[], flag_t *flags, arg_t *arg)
@@ -36,30 +37,3 @@ int parse_args(int argc, char *argv[], flag_t *flags, arg_t *arg)
     return EXIT_SUCCESS;
 }
 
-
-int check_file_type(char* arg) 
-{
-    struct stat sb;
-
-    if (lstat(arg, &sb) == -1) {
-        return -1;
-    }
-
-    switch (sb.st_mode & S_IFMT) {
-        case S_IFREG: break;        
-        case S_IFLNK: return 1;
-        case S_IFCHR: return 3;
-        case S_IFBLK: return 4;
-        case S_IFDIR: return 5;
-        case S_IFIFO: return 6;
-        case S_IFSOCK: break;
-        default: break;
-    }
-
-    return 0;
-}
-
-void error_message(char* file_name) 
-{
-    fprintf(stderr, "my_tar: %s: Cannot stat: No such file or directory\n", file_name);
-}

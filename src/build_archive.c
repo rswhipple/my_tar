@@ -1,7 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "header.h"
+#include "../include/build_archive.h"
+#include "../include/helper.h"
+#include "../include/parser.h"
+#include "../include/tar_header.h"
+
 
 int create_archive(char *name) 
 {

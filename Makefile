@@ -1,9 +1,8 @@
 TARGET = my_tar
-SRCS = my_tar.c getopt.c parser.c build_archive.c deallocate_memory.c tar_header.c read_and_update_archive.c extract_archive.c
+SRCS = src/my_tar.c src/helper.c src/getopt.c src/parser.c src/build_archive.c src/memory.c src/tar_header.c src/read_and_update_archive.c src/extract_archive.c
 OBJS = $(SRCS:.c=.o)
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror 
-
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -13,7 +12,7 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o
+	rm -f src/*.o
 
 fclean: clean
 	rm -f $(TARGET)

@@ -1,4 +1,4 @@
-#include "header.h"
+#include "../include/getopt.h"
 
 /* run_getopt() initiates struct flag_t varaibles and then runs switch to check for flag options */
 int my_getopt(int argc, char *argv[], flag_t* flags) {

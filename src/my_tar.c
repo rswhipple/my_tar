@@ -1,5 +1,12 @@
 #include <stdlib.h>
-#include "header.h"
+#include "../include/header.h"
+#include "../include/build_archive.h"
+#include "../include/parser.h"
+#include "../include/getopt.h"
+#include "../include/read_and_update_archive.h"
+#include "../include/extract_archive.h"
+#include "../include/memory.h"
+
 
 int main(int argc, char *argv[]) 
 {

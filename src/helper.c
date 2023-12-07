@@ -1,4 +1,5 @@
-#include "header.h"
+#include "../include/helper.h"
+
 
 unsigned int calculate_string_ascii_sum(char *header, int size)
 {
@@ -11,7 +12,6 @@ unsigned int calculate_string_ascii_sum(char *header, int size)
     
     return sum;
 }
-
 
 char* my_strcpy(char* dst, char* src)
 {
@@ -27,7 +27,6 @@ char* my_strcpy(char* dst, char* src)
     return dst;
 }
 
-
 char* my_strncpy(char* dst, char* src, int index)
 {
     int i;
@@ -42,7 +41,6 @@ char* my_strncpy(char* dst, char* src, int index)
 
     return dst;
 }
-
 
 int my_strcmp(char* str_1, char* str_2) 
 {
@@ -67,7 +65,6 @@ int my_strcmp(char* str_1, char* str_2)
     }
 }
 
-
 int my_strlen(char* str) 
 {
     int i = 0;
@@ -78,7 +75,6 @@ int my_strlen(char* str)
 
     return i;
 }
-
 
 long my_strtol(char *str, char **endptr, int base) 
 {
@@ -115,7 +111,6 @@ long my_strtol(char *str, char **endptr, int base)
     return result;
 }
 
-
 char* my_strcat(char *dst, char *src) { 
     // Save original destination pointer
     char *original_dst = dst; 
@@ -138,8 +133,6 @@ char* my_strcat(char *dst, char *src) {
     return original_dst;
 }
 
-
-
 int my_is_space(int c)
 {
     if (c == ' ' || c == '\t' || c == '\n') {
@@ -148,7 +141,6 @@ int my_is_space(int c)
         return 0;
     }
 }
-
 
 int my_is_digit(int c)
 {
@@ -159,7 +151,6 @@ int my_is_digit(int c)
     }
 }
 
-
 int my_is_alpha(int c)
 {
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
@@ -169,7 +160,6 @@ int my_is_alpha(int c)
     }
 }
 
-
 int my_to_downcase(int c)
 {
     int output = c;
@@ -178,5 +168,33 @@ int my_to_downcase(int c)
     } 
 
     return output;
+}
+
+void error_message(char* file_name) 
+{
+    fprintf(stderr, "my_tar: %s: Cannot stat: No such file or directory\n", file_name);
+}
+
+
+int check_file_type(char* arg) 
+{
+    struct stat sb;
+
+    if (lstat(arg, &sb) == -1) {
+        return -1;
+    }
+
+    switch (sb.st_mode & S_IFMT) {
+        case S_IFREG: break;        
+        case S_IFLNK: return 1;
+        case S_IFCHR: return 3;
+        case S_IFBLK: return 4;
+        case S_IFDIR: return 5;
+        case S_IFIFO: return 6;
+        case S_IFSOCK: break;
+        default: break;
+    }
+
+    return 0;
 }
 

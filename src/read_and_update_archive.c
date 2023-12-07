@@ -1,5 +1,5 @@
-#include "header.h"
-
+#include "../include/read_and_update_archive.h"
+#include "../include/helper.h"
 
 int read_file_names(char *tar_filename)
 {

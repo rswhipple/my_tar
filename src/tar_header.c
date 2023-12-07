@@ -1,4 +1,5 @@
-#include "header.h"
+#include "../include/tar_header.h"
+#include "../include/helper.h"
 
 
 void create_header(header_t *header, char *file_name, int type) 
