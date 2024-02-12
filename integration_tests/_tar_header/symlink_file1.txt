@@ -1,1 +1,0 @@
-../my_tar/file1.txt
